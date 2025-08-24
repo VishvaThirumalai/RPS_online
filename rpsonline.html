@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPS Online - Multiplayer Rock Paper Scissors</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Header Styles */
+        .header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo i {
+            color: #fdbb2d;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Login Modal */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .login-content {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .login-title {
+            font-size: 32px;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #fdbb2d, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .social-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .social-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .google-btn {
+            background: #4285f4;
+            color: white;
+        }
+
+        .facebook-btn {
+            background: #1877f2;
+            color: white;
+        }
+
+        .twitter-btn {
+            background: #1da1f2;
+            color: white;
+        }
+
+        .guest-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .online-friends {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .friend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .friend-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .friend-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: auto;
+        }
+
+        .status-online { background: #4caf50; }
+        .status-playing { background: #ff9800; }
+        .status-offline { background: #757575; }
+
+        /* Game Area */
+        .game-area {
+            flex: 2;
+            min-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .game-title {
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(45deg, #fdbb2d, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-status {
+            font-size: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+        }
+
+        .choices {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .choice-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .choice-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .choice-btn.selected {
+            border-color: #fdbb2d;
+            background: rgba(253, 187, 45, 0.3);
+            box-shadow: 0 0 20px rgba(253, 187, 45, 0.5);
+        }
+
+        .play-btn {
+            background: linear-gradient(45deg, #fdbb2d, #ff6b6b);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .play-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .play-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-area {
+            margin-top: 30px;
+            text-align: center;
+            min-height: 100px;
+        }
+
+        .result-text {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #fdbb2d;
+        }
+
+        .round-result {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .player-score {
+            text-align: center;
+        }
+
+        .player-name {
+            font-size: 18px;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .score {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+       
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 15px;
+        }
+      .chat-messages {
+        flex: 1;
+        max-height: 300px;     
+        overflow-y: auto;      
+        padding: 10px;
+        box-sizing: border-box;
+
+        /* Smooth scrolling on swipe / touch */
+        -webkit-overflow-scrolling: touch;
+
+        /* Hide scrollbar but keep scrolling */
+        -ms-overflow-style: none;  /* IE/Edge */
+        scrollbar-width: none;     /* Firefox */
+}
+
+        .chat-messages::-webkit-scrollbar {
+            display: none;  /* Chrome, Safari */
+        }
+                
+
+        .message {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .message.sent {
+            background: rgba(253, 187, 45, 0.3);
+            margin-left: 20px;
+        }
+
+        .message.received {
+            background: rgba(255, 255, 255, 0.1);
+            margin-right: 20px;
+        }
+
+        .quick-messages {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .quick-msg-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .quick-msg-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .countdown {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: bold;
+            color: #fdbb2d;
+            text-shadow: 0 0 30px rgba(253, 187, 45, 0.8);
+            z-index: 1500;
+        }
+
+        .battle-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1500;
+        }
+
+        .battle-choices {
+            display: flex;
+            gap: 100px;
+            align-items: center;
+        }
+
+        .battle-choice {
+            font-size: 80px;
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+        }
+
+        .vs-text {
+            font-size: 48px;
+            font-weight: bold;
+            color: #fdbb2d;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar, .chat-area {
+                width: 100%;
+            }
+            
+            .choices {
+                gap: 15px;
+            }
+            
+            .choice-btn {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fa-solid fa-hand-fist"></i>
+                <span>RPS Online</span>
+            </div>
+            <div class="user-info" id="userInfo" style="display: none;">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span id="userName">Player</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Login Modal -->
+        <div class="login-modal" id="loginModal">
+            <div class="login-content">
+                <h1 class="login-title">🎮 Welcome to RPS Online</h1>
+                <p style="margin-bottom: 30px; opacity: 0.8;">Connect with friends and play Rock Paper Scissors online!</p>
+                
+                <button class="social-login-btn google-btn" onclick="socialLogin('google')">
+                    <i class="fab fa-google"></i>
+                    Continue with Google
+                </button>
+                
+                <button class="social-login-btn facebook-btn" onclick="socialLogin('facebook')">
+                    <i class="fab fa-facebook-f"></i>
+                    Continue with Facebook
+                </button>
+                
+                <button class="social-login-btn twitter-btn" onclick="socialLogin('twitter')">
+                    <i class="fab fa-twitter"></i>
+                    Continue with Twitter
+                </button>
+                
+                <button class="social-login-btn guest-btn" onclick="guestLogin()">
+                    <i class="fas fa-user-secret"></i>
+                    Play as Guest
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="online-friends">
+                    <h3 style="margin-bottom: 15px;">
+                        <i class="fas fa-users"></i> Online Friends (<span id="onlineCount">0</span>)
+                    </h3>
+                    <div id="friendsList">
+                        <!-- Friends will be populated here -->
+                    </div>
+                    <button class="play-btn" onclick="findRandomOpponent()" style="margin-top: 15px; font-size: 14px;">
+                        🎯 Find Random Opponent
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Game Area -->
+            <div class="game-area">
+                <h1 class="game-title">Rock Paper Scissors</h1>
+                
+                <div class="game-status" id="gameStatus">
+                    Waiting for opponent...
+                </div>
+
+                <div class="choices">
+                    <div class="choice-btn" data-choice="rock" onclick="selectChoice('rock')">
+                        ✊
+                    </div>
+                    <div class="choice-btn" data-choice="paper" onclick="selectChoice('paper')">
+                        ✋
+                    </div>
+                    <div class="choice-btn" data-choice="scissors" onclick="selectChoice('scissors')">
+                        ✌️
+                    </div>
+                </div>
+
+                <button class="play-btn" id="playBtn" onclick="playRound()" disabled>
+                    Choose Your Weapon
+                </button>
+
+                <div class="result-area">
+                    <div class="result-text" id="resultText">Make your choice!</div>
+                    <div class="round-result" id="roundResult">First to 3 wins!</div>
+                </div>
+
+                <div class="score-board">
+                    <div class="player-score">
+                        <div class="player-name" id="player1Name">You</div>
+                        <div class="score" id="player1Score">0</div>
+                    </div>
+                    <div class="player-score">
+                        <div class="player-name">VS</div>
+                        <div class="score">-</div>
+                    </div>
+                    <div class="player-score">
+                        <div class="player-name" id="player2Name">Opponent</div>
+                        <div class="score" id="player2Score">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-area">
+                <div class="chat-header">
+                    <h3><i class="fas fa-comments"></i> Game Chat</h3>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message received">
+                        <strong>System:</strong> Welcome to the game! 🎮
+                    </div>
+                </div>
+                
+                <div class="quick-messages">
+                    <button class="quick-msg-btn" onclick="sendQuickMessage('Good luck! 🍀')">Good luck! 🍀</button>
+                    <button class="quick-msg-btn" onclick="sendQuickMessage('Nice move! 👏')">Nice move! 👏</button>
+                    <button class="quick-msg-btn" onclick="sendQuickMessage('Well played! 🎯')">Well played! 🎯</button>
+                    <button class="quick-msg-btn" onclick="sendQuickMessage('GG! 🎉')">GG! 🎉</button>
+                    <button class="quick-msg-btn" onclick="sendQuickMessage('Rematch? 🔄')">Rematch? 🔄</button>
+                    <button class="quick-msg-btn" onclick="sendQuickMessage('Amazing! ⭐')">Amazing! ⭐</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Countdown Overlay -->
+    <div class="countdown" id="countdown" style="display: none;"></div>
+
+    <!-- Battle Animation -->
+    <div class="battle-animation" id="battleAnimation" style="display: none;">
+        <div class="battle-choices">
+            <div class="battle-choice" id="playerChoice">✊</div>
+            <div class="vs-text">VS</div>
+            <div class="battle-choice" id="opponentChoice">✊</div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let currentUser = null;
+        let gameState = {
+            isPlaying: false,
+            playerChoice: null,
+            opponentChoice: null,
+            playerScore: 0,
+            opponentScore: 0,
+            opponent: null,
+            waitingForOpponent: false
+        };
+
+        // Mock data for demonstration
+        const mockFriends = [
+            { id: 1, name: 'Alex', status: 'online', avatar: '👨' },
+            { id: 2, name: 'Sarah', status: 'playing', avatar: '👩' },
+            { id: 3, name: 'Mike', status: 'online', avatar: '👨' },
+            { id: 4, name: 'Emma', status: 'offline', avatar: '👩' }
+        ];
+
+        // Initialize
+        window.onload = function() {
+            updateFriendsList();
+        };
+
+        // Login Functions
+        function socialLogin(provider) {
+            // In a real app, this would integrate with the provider's SDK
+            // For demo purposes, we'll simulate a successful login
+            const userData = {
+                id: Date.now(),
+                name: provider.charAt(0).toUpperCase() + provider.slice(1) + ' User',
+                provider: provider,
+                avatar: '👤'
+            };
+            
+            localStorage.setItem('rps_user', JSON.stringify(userData));
+            loginUser(userData);
+            showNotification('Successfully logged in with ' + provider);
+        }
+
+        function guestLogin() {
+            const guestData = {
+                id: Date.now(),
+                name: 'Guest' + Math.floor(Math.random() * 1000),
+                provider: 'guest',
+                avatar: '👤'
+            };
+            
+            localStorage.setItem('rps_user', JSON.stringify(guestData));
+            loginUser(guestData);
+            showNotification('Welcome, Guest Player!');
+        }
+
+        function loginUser(userData) {
+            currentUser = userData;
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('userName').textContent = userData.name;
+            document.getElementById('player1Name').textContent = userData.name;
+            
+            // Simulate joining online
+            addChatMessage('System', 'You joined the game! 🎮', false);
+        }
+
+        function logout() {
+            localStorage.removeItem('rps_user');
+            currentUser = null;
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('userInfo').style.display = 'none';
+            resetGame();
+        }
+
+        // Game Functions
+        function selectChoice(choice) {
+            if (!gameState.isPlaying) return;
+            
+            // Remove previous selection
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Add selection to clicked choice
+            document.querySelector(`[data-choice="${choice}"]`).classList.add('selected');
+            gameState.playerChoice = choice;
+            
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('playBtn').textContent = 'Play Round!';
+        }
+
+        function playRound() {
+            if (!gameState.playerChoice || !gameState.isPlaying) return;
+            
+            document.getElementById('playBtn').disabled = true;
+            document.getElementById('playBtn').textContent = 'Playing...';
+            
+            // Simulate opponent choice
+            const choices = ['rock', 'paper', 'scissors'];
+            gameState.opponentChoice = choices[Math.floor(Math.random() * 3)];
+            
+            // Start countdown
+            showCountdown(() => {
+                showBattleAnimation();
+            });
+        }
+
+        function showCountdown(callback) {
+            const countdownEl = document.getElementById('countdown');
+            let count = 3;
+            
+            countdownEl.style.display = 'block';
+            countdownEl.textContent = count;
+            
+            const countInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownEl.textContent = count;
+                } else if (count === 0) {
+                    countdownEl.textContent = 'SHOOT!';
+                } else {
+                    clearInterval(countInterval);
+                    countdownEl.style.display = 'none';
+                    callback();
+                }
+            }, 1000);
+        }
+
+        function showBattleAnimation() {
+            const battleEl = document.getElementById('battleAnimation');
+            const playerChoiceEl = document.getElementById('playerChoice');
+            const opponentChoiceEl = document.getElementById('opponentChoice');
+            
+            const choiceEmojis = {
+                rock: '✊',
+                paper: '✋',
+                scissors: '✌️'
+            };
+            
+            playerChoiceEl.textContent = choiceEmojis[gameState.playerChoice];
+            opponentChoiceEl.textContent = choiceEmojis[gameState.opponentChoice];
+            
+            battleEl.style.display = 'flex';
+            
+            setTimeout(() => {
+                battleEl.style.display = 'none';
+                determineWinner();
+            }, 2000);
+        }
+
+        function determineWinner() {
+            const player = gameState.playerChoice;
+            const opponent = gameState.opponentChoice;
+            
+            let result = '';
+            let resultMessage = '';
+            
+            if (player === opponent) {
+                result = 'draw';
+                resultMessage = 'It\'s a Draw!';
+                document.getElementById('roundResult').textContent = `Both chose ${player}`;
+            } else if (
+                (player === 'rock' && opponent === 'scissors') ||
+                (player === 'paper' && opponent === 'rock') ||
+                (player === 'scissors' && opponent === 'paper')
+            ) {
+                result = 'win';
+                resultMessage = 'You Win!';
+                gameState.playerScore++;
+                document.getElementById('roundResult').textContent = `${capitalize(player)} beats ${opponent}`;
+                sendQuickMessage('Nice move! 👏');
+            } else {
+                result = 'lose';
+                resultMessage = 'You Lose!';
+                gameState.opponentScore++;
+                document.getElementById('roundResult').textContent = `${capitalize(opponent)} beats ${player}`;
+                addChatMessage('Opponent', 'Well played! 🎯', false);
+            }
+            
+            document.getElementById('resultText').textContent = resultMessage;
+            document.getElementById('player1Score').textContent = gameState.playerScore;
+            document.getElementById('player2Score').textContent = gameState.opponentScore;
+            
+            // Check for game end
+            if (gameState.playerScore >= 3) {
+                endGame('You won the match! 🎉');
+            } else if (gameState.opponentScore >= 3) {
+                endGame('You lost the match! 😢');
+            } else {
+                // Reset for next round
+                gameState.playerChoice = null;
+                document.querySelectorAll('.choice-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                document.getElementById('playBtn').textContent = 'Choose Your Weapon';
+                document.getElementById('playBtn').disabled = true;
+            }
+        }
+
+        function endGame(message) {
+            gameState.isPlaying = false;
+            document.getElementById('gameStatus').textContent = message;
+            document.getElementById('playBtn').textContent = 'Play Again';
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('playBtn').onclick = startNewGame;
+        }
+
+        function startNewGame() {
+            resetGame();
+            findRandomOpponent();
+        }
+
+        function resetGame() {
+            gameState = {
+                isPlaying: false,
+                playerChoice: null,
+                opponentChoice: null,
+                playerScore: 0,
+                opponentScore: 0,
+                opponent: null,
+                waitingForOpponent: false
+            };
+            
+            document.getElementById('player1Score').textContent = '0';
+            document.getElementById('player2Score').textContent = '0';
+            document.getElementById('resultText').textContent = 'Make your choice!';
+            document.getElementById('roundResult').textContent = 'First to 3 wins!';
+            document.getElementById('playBtn').textContent = 'Choose Your Weapon';
+            document.getElementById('playBtn').disabled = true;
+            document.getElementById('playBtn').onclick = playRound;
+            
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+        }
+
+        function findRandomOpponent() {
+            if (gameState.isPlaying) return;
+            
+            document.getElementById('gameStatus').textContent = 'Finding opponent...';
+            document.getElementById('playBtn').disabled = true;
+            
+            // Simulate finding opponent
+            setTimeout(() => {
+                const randomOpponent = mockFriends.filter(f => f.status === 'online')[Math.floor(Math.random() * 2)];
+                if (randomOpponent) {
+                    startGameWithOpponent(randomOpponent);
+                } else {
+                    startGameWithOpponent({ name: 'AI Bot', avatar: '🤖' });
+                }
+            }, 2000);
+        }
+
+        function challengeFriend(friendId) {
+            const friend = mockFriends.find(f => f.id === friendId);
+            if (friend && friend.status === 'online') {
+                startGameWithOpponent(friend);
+                showNotification(`Challenged ${friend.name} to a game!`);
+            }
+        }
+
+        function startGameWithOpponent(opponent) {
+            gameState.opponent = opponent;
+            gameState.isPlaying = true;
+            document.getElementById('gameStatus').textContent = `Playing against ${opponent.name}`;
+            document.getElementById('player2Name').textContent = opponent.name;
+            resetGame();
+            gameState.isPlaying = true;
+            
+            addChatMessage('System', `${opponent.name} joined the game!`, false);
+            addChatMessage(opponent.name, 'Good luck! 🍀', false);
+        }
+
+        // Chat Functions
+        function sendQuickMessage(message) {
+            if (!currentUser) return;
+            addChatMessage(currentUser.name, message, true);
+        }
+
+        function addChatMessage(sender, message, isSent) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Friends Functions
+        function updateFriendsList() {
+            const friendsList = document.getElementById('friendsList');
+            const onlineCount = document.getElementById('onlineCount');
+            
+            friendsList.innerHTML = '';
+            let onlineCounter = 0;
+            
+            mockFriends.forEach(friend => {
+                if (friend.status === 'online') onlineCounter++;
+                
+                const friendDiv = document.createElement('div');
+                friendDiv.className = 'friend-item';
+                friendDiv.onclick = () => challengeFriend(friend.id);
+                
+                friendDiv.innerHTML = `
+                    <div class="friend-avatar">${friend.avatar}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold;">${friend.name}</div>
+                        <div style="font-size: 12px; opacity: 0.7;">${capitalize(friend.status)}</div>
+                    </div>
+                    <div class="status-indicator status-${friend.status}"></div>
+                `;
+                
+                friendsList.appendChild(friendDiv);
+            });
+            
+            onlineCount.textContent = onlineCounter;
+        }
+
+        // Utility Functions
+        function capitalize(word) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }
+
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(45deg, #4caf50, #45a049);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 3000;
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Check if user is already logged in
+        if (localStorage.getItem('rps_user')) {
+            const userData = JSON.parse(localStorage.getItem('rps_user'));
+            loginUser(userData);
+        }
+
+        // Simulate random friend status changes
+        setInterval(() => {
+            if (Math.random() < 0.3) { // 30% chance every 10 seconds
+                const randomFriend = mockFriends[Math.floor(Math.random() * mockFriends.length)];
+                const statuses = ['online', 'offline', 'playing'];
+                const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                
+                if (randomFriend.status !== newStatus) {
+                    randomFriend.status = newStatus;
+                    updateFriendsList();
+                }
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
